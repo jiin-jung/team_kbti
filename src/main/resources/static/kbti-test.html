@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>K-League KBTI 테스트</title>
+    <style>
+        :root { --primary: #00529b; --secondary: #e61e2b; --bg: #f8f9fa; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 40px 20px; }
+        .container { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 500px; }
+        h1 { text-align: center; color: var(--primary); font-size: 28px; margin-bottom: 10px; }
+        .sub-title { text-align: center; color: #666; margin-bottom: 18px; font-size: 15px; }
+
+        .home-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ddd;
+            color: #333;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 18px;
+        }
+        .home-btn:hover { background: #ccc; }
+
+        .question-box { margin-bottom: 35px; }
+        .q-text { font-weight: 700; font-size: 17px; margin-bottom: 15px; display: block; color: #333; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+
+        .option-item { position: relative; }
+        .option-item input { position: absolute; opacity: 0; cursor: pointer; }
+        .option-label {
+            display: block; padding: 16px; border: 2px solid #eee; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; text-align: center; font-size: 15px;
+        }
+        .option-item input:checked + .option-label {
+            border-color: var(--primary); background-color: #eef6ff; color: var(--primary); font-weight: 600;
+        }
+
+        .submit-btn {
+            width: 100%; padding: 18px; background: var(--primary); color: white; border: none;
+            border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px;
+        }
+
+        #result {
+            margin-top: 40px; padding: 30px; border-radius: 20px; background: #fff;
+            border: 2px solid var(--primary); display: none; text-align: center;
+        }
+        .kbti-code { font-size: 42px; font-weight: 900; color: var(--primary); letter-spacing: 4px; margin-bottom: 5px; }
+        .team-badge { font-size: 14px; color: #888; margin-bottom: 15px; }
+
+        /* ✅ 팀 이름을 링크처럼 보이게 */
+        .team-name {
+            font-size: 26px; font-weight: bold; color: var(--secondary);
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 6px;
+        }
+        .description { font-size: 15px; line-height: 1.7; color: #444; word-break: keep-all; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button class="home-btn" onclick="location.href='/'">홈으로</button>
+
+    <h1>K-League KBTI</h1>
+    <p class="sub-title">나의 축구 취향 코드를 확인해보세요!</p>
+
+    <div class="question-box">
+        <span class="q-text">Q1. 우리 팀이 역습 기회를 잡았다면?</span>
+        <div class="options">
+            <div class="option-item">
+                <input type="radio" name="tempo" id="t-s" value="1">
+                <label class="option-label" for="t-s">천천히 패스하며 확실한 기회를 노린다 (Slow)</label>
+            </div>
+            <div class="option-item">
+                <input type="radio" name="tempo" id="t-f" value="5">
+                <label class="option-label" for="t-f">앞뒤 가리지 않고 빠르게 골문으로 돌진! (Fast)</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span class="q-text">Q2. 내가 좋아하는 패스 스타일은?</span>
+        <div class="options">
+            <div class="option-item">
+                <input type="radio" name="directness" id="d-s" value="1">
+                <label class="option-label" for="d-s">아기자기한 짧은 패스 위주의 빌드업 (Short)</label>
+            </div>
+            <div class="option-item">
+                <input type="radio" name="directness" id="d-l" value="5">
+                <label class="option-label" for="d-l">한 번에 수비 뒷공간을 노리는 롱패스 (Long)</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span class="q-text">Q3. 상대가 공을 잡았을 때 나는?</span>
+        <div class="options">
+            <div class="option-item">
+                <input type="radio" name="pressing" id="p-p" value="1">
+                <label class="option-label" for="p-p">내 자리를 지키며 차분히 수비한다 (Passive)</label>
+            </div>
+            <div class="option-item">
+                <input type="radio" name="pressing" id="p-a" value="5">
+                <label class="option-label" for="p-a">전방부터 숨 막히게 압박한다 (Aggressive)</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-box">
+        <span class="q-text">Q4. 치열한 볼 경합 상황이 벌어지면?</span>
+        <div class="options">
+            <div class="option-item">
+                <input type="radio" name="fight" id="f-d" value="1">
+                <label class="option-label" for="f-d">영리하고 기술적으로 공을 따낸다 (Delicate)</label>
+            </div>
+            <div class="option-item">
+                <input type="radio" name="fight" id="f-t" value="5">
+                <label class="option-label" for="f-t">거친 몸싸움도 마다하지 않고 부딪힌다 (Tough)</label>
+            </div>
+        </div>
+    </div>
+
+    <button class="submit-btn" onclick="calculateKbti()">결과 확인하기</button>
+
+    <div id="result">
+        <div class="kbti-code" id="res-code"></div>
+        <div class="team-badge">당신과 가장 닮은 전술을 가진 팀은?</div>
+        <div class="team-name" id="res-team" title="클릭하면 팀 상세로 이동"></div>
+        <div class="description" id="res-desc"></div>
+    </div>
+</div>
+
+<script>
+    async function calculateKbti() {
+        const getVal = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
+
+        if (!getVal('tempo') || !getVal('directness') || !getVal('pressing') || !getVal('fight')) {
+            alert("모든 문항에 답해주세요!");
+            return;
+        }
+
+        const data = {
+            tempo: parseInt(getVal('tempo')),
+            directness: parseInt(getVal('directness')),
+            pressing: parseInt(getVal('pressing')),
+            fight: parseInt(getVal('fight'))
+        };
+
+        try {
+            const res = await fetch('/api/kbti/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('res-code').innerText = result.kbtiCode;
+            document.getElementById('res-desc').innerText = result.description;
+
+            const teamEl = document.getElementById('res-team');
+            teamEl.innerText = result.teamName;
+
+            // ✅ 클릭하면 팀 상세로 이동 (teamId 필요)
+            teamEl.onclick = () => {
+                if (!result.teamId) {
+                    alert('teamId가 응답에 없습니다. 서버 응답 DTO(KbtiResponse)에 teamId를 추가해야 합니다.');
+                    return;
+                }
+                location.href = `/team-detail.html?teamId=${result.teamId}`;
+            };
+
+            window.scrollTo(0, document.body.scrollHeight);
+        } catch (e) {
+            alert("서버가 응답하지 않습니다.");
+            console.error(e);
+        }
+    }
+</script>
+
+</body>
+</html>

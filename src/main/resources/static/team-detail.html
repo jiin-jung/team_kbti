@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>KBTI | 팀 상세</title>
+  <style>
+    :root {
+      --primary: #00529b;
+      --secondary: #e61e2b;
+      --bg: #f8f9fa;
+    }
+
+    body {
+      font-family: 'Pretendard', sans-serif;
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .home-btn {
+      width: 100%;
+      padding: 14px;
+      background: #ddd;
+      color: #333;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 25px;
+    }
+
+    .home-btn:hover {
+      background: #ccc;
+    }
+
+    .title-area {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 28px;
+    }
+
+    .sub-title {
+      margin: 10px 0 0;
+      color: #666;
+      font-size: 15px;
+    }
+
+    .kbti-area {
+      margin: 25px 0 35px;
+      padding: 18px 16px;
+      border-radius: 18px;
+      border: 2px solid var(--primary);
+      background: #eef6ff;
+      text-align: center;
+    }
+
+    .kbti-label {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .kbti-code {
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: 4px;
+    }
+
+    .stat-box {
+      border: 2px solid #eee;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .stat-title {
+      font-weight: bold;
+      color: var(--secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 15px;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <button class="home-btn" onclick="location.href='/'">🏠 홈으로</button>
+
+  <div class="title-area">
+    <h1 id="team-name">팀 이름</h1>
+    <p class="sub-title">팀 전술 성향 상세 분석</p>
+  </div>
+
+  <div class="kbti-area">
+    <div class="kbti-label">이 팀의 KBTI</div>
+    <div class="kbti-code" id="team-kbti">----</div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-title">전개 속도 (Tempo)</div>
+    <div class="stat-value" id="tempo"></div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-title">패스 직선성 (Directness)</div>
+    <div class="stat-value" id="directness"></div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-title">압박 강도 (Pressing)</div>
+    <div class="stat-value" id="pressing"></div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-title">측면 활용도 (Side Usage)</div>
+    <div class="stat-value" id="sideUsage"></div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-title">투지 (Fight)</div>
+    <div class="stat-value" id="fight"></div>
+  </div>
+
+</div>
+
+<script>
+  function getTeamId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('teamId');
+  }
+
+  async function loadTeamDetail() {
+    const teamId = getTeamId();
+    if (!teamId) {
+      alert('잘못된 접근입니다.');
+      location.href = '/';
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/teams/${teamId}`);
+      const t = await res.json();
+
+      document.getElementById('team-name').innerText = t.teamName ?? '';
+      document.getElementById('team-kbti').innerText = t.teamKbti ?? '—';
+
+      document.getElementById('tempo').innerText = t.tempo;
+      document.getElementById('directness').innerText = t.directness;
+      document.getElementById('pressing').innerText = t.pressing;
+      document.getElementById('sideUsage').innerText = t.sideUsage;
+      document.getElementById('fight').innerText = t.fight;
+
+    } catch (e) {
+      alert('팀 정보를 불러오지 못했습니다.');
+      console.error(e);
+    }
+  }
+
+  window.onload = loadTeamDetail;
+</script>
+
+</body>
+</html>

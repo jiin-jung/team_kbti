@@ -18,7 +18,7 @@ public class KbtiController {
     }
 
     /**
-     * 사용자의 입력 데이터를 받아 최적의 매칭 결과를 반환합니다.
+     * 사용자의 입력 데이터를 받아 최적의 매칭 결과를 반환.
      */
     @PostMapping("/test")
     public KbtiResponse runTest(@RequestBody KbtiRequest request) {

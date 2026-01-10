@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>KBTI | K-League Tactics Index</title>
+    <title>K-League 팀 조회</title>
     <style>
         :root {
             --primary: #00529b;
@@ -24,32 +24,38 @@
             border-radius: 24px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             width: 100%;
-            max-width: 900px;
+            max-width: 600px;
         }
 
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 25px;
-        }
-
-        header h1 {
+        h1 {
+            text-align: center;
             color: var(--primary);
             font-size: 28px;
-            margin: 0;
+            margin-bottom: 10px;
         }
 
-        nav a {
-            margin-left: 20px;
-            text-decoration: none;
+        .sub-title {
+            text-align: center;
+            color: #666;
+            margin-bottom: 22px;
+            font-size: 15px;
+        }
+
+        .home-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ddd;
             color: #333;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
             font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 18px;
         }
 
-        h2 {
-            margin: 0 0 14px;
-            color: #333;
+        .home-btn:hover {
+            background: #ccc;
         }
 
         .search-bar {
@@ -85,34 +91,33 @@
             background: #ccc;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            border-bottom: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        tbody tr {
+        .team-card {
+            border: 2px solid #eee;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 18px;
+            transition: all 0.2s;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
 
-        tbody tr:hover {
-            background-color: #eef6ff;
+        .team-card:hover {
+            border-color: var(--primary);
+            background: #eef6ff;
+        }
+
+        .team-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
         }
 
         .team-name {
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 700;
             color: var(--secondary);
+            margin: 0;
         }
 
         .kbti-badge {
@@ -125,10 +130,13 @@
             letter-spacing: 1px;
             color: var(--primary);
             font-size: 12px;
+            white-space: nowrap;
         }
 
-        .empty {
-            color: #888;
+        .stats {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.6;
         }
 
         .no-result {
@@ -146,16 +154,10 @@
 
 <div class="container">
 
-    <header>
-        <h1>KBTI</h1>
-        <nav>
-            <a href="#">선수 목록</a>
-            <a href="/team-list.html">팀 목록</a>
-            <a href="/kbti-test.html">KBTI 테스트</a>
-        </nav>
-    </header>
+    <button class="home-btn" onclick="location.href='/'">홈으로</button>
 
-    <h2>K리그 팀 목록</h2>
+    <h1>K-League Teams</h1>
+    <p class="sub-title">KBTI 분석 기준 팀 전술 리스트</p>
 
     <!-- 검색 -->
     <div class="search-bar">
@@ -168,26 +170,8 @@
         <button class="search-btn" id="clearBtn" type="button">초기화</button>
     </div>
 
-    <table id="team-table">
-        <thead>
-        <tr>
-            <th>번호</th>
-            <th>팀</th>
-            <th>Tempo</th>
-            <th>Directness</th>
-            <th>Pressing</th>
-            <th>Side Usage</th>
-            <th>Fight</th>
-            <th>KBTI</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- JS로 자동 채움 -->
-        </tbody>
-    </table>
-
+    <div id="team-list"></div>
     <div id="noResult" class="no-result">검색 결과가 없습니다.</div>
-
 </div>
 
 <script>
@@ -197,11 +181,11 @@
         return (str ?? '').toString().trim().toLowerCase();
     }
 
-    function renderTable(teams) {
-        const tbody = document.querySelector('#team-table tbody');
+    function renderCards(teams) {
+        const list = document.getElementById('team-list');
         const noResult = document.getElementById('noResult');
 
-        tbody.innerHTML = '';
+        list.innerHTML = '';
 
         if (!teams || teams.length === 0) {
             noResult.style.display = 'block';
@@ -210,48 +194,49 @@
 
         noResult.style.display = 'none';
 
-        teams.forEach(team => {
-            const tr = document.createElement('tr');
+        teams.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'team-card';
 
-            const kbti = team.teamKbti
-                ? `<span class="kbti-badge">${team.teamKbti}</span>`
-                : `<span class="empty">—</span>`;
+            const kbti = t.teamKbti ? t.teamKbti : '—';
 
-            tr.innerHTML = `
-                <td>${team.rank ?? ''}</td>
-                <td class="team-name">${team.teamName ?? ''}</td>
-                <td>${Number(team.tempo).toFixed(2)}</td>
-                <td>${Number(team.directness).toFixed(2)}</td>
-                <td>${Number(team.pressing).toFixed(2)}</td>
-                <td>${Number(team.sideUsage).toFixed(2)}</td>
-                <td>${Number(team.fight).toFixed(2)}</td>
-                <td>${kbti}</td>
+            card.innerHTML = `
+                <div class="team-top">
+                    <p class="team-name">${t.teamName}</p>
+                    <span class="kbti-badge">${kbti}</span>
+                </div>
+                <div class="stats">
+                    전개 속도: ${t.tempo}<br/>
+                    패스 직선성: ${t.directness}<br/>
+                    압박 강도: ${t.pressing}<br/>
+                    측면 활용도: ${t.sideUsage}<br/>
+                    투지: ${t.fight}
+                </div>
             `;
 
-            tr.onclick = () => {
-                location.href = `/team-detail.html?teamId=${team.teamId}`;
+            card.onclick = () => {
+                location.href = `/team-detail.html?teamId=${t.teamId}`;
             };
 
-            tbody.appendChild(tr);
+            list.appendChild(card);
         });
     }
 
     function applySearch() {
         const q = normalize(document.getElementById('searchInput').value);
         if (!q) {
-            renderTable(allTeams);
+            renderCards(allTeams);
             return;
         }
-
         const filtered = allTeams.filter(t => normalize(t.teamName).includes(q));
-        renderTable(filtered);
+        renderCards(filtered);
     }
 
     async function loadTeams() {
         try {
-            const res = await fetch('/api/teams/rank');
+            const res = await fetch('/api/teams');
             allTeams = await res.json();
-            renderTable(allTeams);
+            renderCards(allTeams);
         } catch (e) {
             alert('팀 데이터를 불러오지 못했습니다.');
             console.error(e);
@@ -268,7 +253,7 @@
 
         clearBtn.addEventListener('click', () => {
             input.value = '';
-            renderTable(allTeams);
+            renderCards(allTeams);
         });
     };
 </script>

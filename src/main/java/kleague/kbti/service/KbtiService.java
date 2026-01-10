@@ -3,14 +3,17 @@ package kleague.kbti.service;
 import kleague.kbti.dto.KbtiRequest;
 import kleague.kbti.dto.KbtiResponse;
 import kleague.kbti.dto.TeamTactics;
+import kleague.kbti.loader.TeamTacticsCsvLoader;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class KbtiService {
 
-    // 1. 16가지 모든 KBTI 조합별 성향 묘사 데이터
+    // KBTI
     private final Map<String, String> kbtiDescriptions = Map.ofEntries(
             Map.entry("SSPD", "차분한 빌드업과 정교한 패스를 추구하는 '그라운드의 예술가'"),
             Map.entry("SSPT", "점유율을 중시하면서도 강한 경합을 마다하지 않는 '중원의 지배자'"),
@@ -30,47 +33,54 @@ public class KbtiService {
             Map.entry("FLAT", "압도적인 활동량과 직선적인 축구로 승리를 쟁취하는 '무적의 야생마'")
     );
 
-    // 2. 분석 데이터 기반 팀 리스트 (이전 단계에서 마이그레이션된 데이터)
-    private final List<TeamTactics> teamTactics = List.of(
-            new TeamTactics("광주FC", 0, 45, 20, 95, 20, 33),
-            new TeamTactics("대구FC", 1, 99, 98, 20, 99, 76),
-            new TeamTactics("제주SK FC", 1, 89, 73, 47, 79, 86),
-            new TeamTactics("FC서울", 0, 32, 36, 57, 53, 53),
-            new TeamTactics("울산 HD FC", 0, 31, 34, 56, 56, 35),
-            new TeamTactics("포항 스틸러스", 0, 36, 76, 63, 46, 26),
-            new TeamTactics("김천 상무", 2, 88, 40, 87, 69, 40),
-            new TeamTactics("강원FC", 2, 55, 62, 34, 80, 40),
-            new TeamTactics("수원FC", 2, 65, 82, 59, 76, 20),
-            new TeamTactics("대전 하나 시티즌", 3, 20, 9, 5, 9, 5)
-    );
+    // CSV 기반 팀 전술 데이터
+    private final List<TeamTactics> teamTactics;
+
+    public KbtiService(TeamTacticsCsvLoader loader) {
+        this.teamTactics = loader.load();
+    }
 
     public KbtiResponse findBestMatch(KbtiRequest request) {
-        // 1. 4글자 KBTI 코드 생성
+
+        // 방어 코드
+        if (teamTactics == null || teamTactics.isEmpty()) {
+            throw new IllegalStateException("teamTactics not initialized");
+        }
+
+        // 4글자 KBTI 코드 생성
         String kbtiCode = generateKbtiCode(request);
 
-        // 2. 사용자 입력 벡터화
+        // 사용자 입력 벡터화
         double[] userVector = {
                 request.getTempo() * 20.0,
                 request.getDirectness() * 20.0,
                 request.getPressing() * 20.0,
-                50.0, // SideUsage 기본값
+                50.0, // sideUsage 기본값
                 request.getFight() * 20.0
         };
 
-        // 3. 가장 가까운 팀 검색 (유클리드 거리 활용)
+        // 가장 가까운 팀 탐색 (유클리드 거리)
         TeamTactics bestMatch = teamTactics.stream()
-                .min(Comparator.comparingDouble(t -> calculateDistance(userVector, t.getScores())))
-                .orElse(teamTactics.get(0));
+                .min(Comparator.comparingDouble(
+                        t -> calculateDistance(userVector, t.getScores())
+                ))
+                .orElseThrow();
 
-        // 4. 결과 반환 (이미지의 getTeamName 에러를 getName 으로 수정)
+        // 결과 반환
         String description = kbtiDescriptions.getOrDefault(kbtiCode, "분석 중입니다...");
-        return KbtiResponse.of(bestMatch.getTeamName(), kbtiCode, description);
+        return KbtiResponse.of(
+                bestMatch.getTeamId(),
+                bestMatch.getTeamName(),
+                kbtiCode,
+                description
+        );
     }
+
+    // ------------------ 내부 로직 ------------------
 
     private String generateKbtiCode(KbtiRequest req) {
         StringBuilder code = new StringBuilder();
 
-        // 기준점 3점을 기준으로 알파벳 부여
         code.append(req.getTempo() >= 3 ? "F" : "S");
         code.append(req.getDirectness() >= 3 ? "L" : "S");
         code.append(req.getPressing() >= 3 ? "A" : "P");
