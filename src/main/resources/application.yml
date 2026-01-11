@@ -17,3 +17,7 @@ spring:
   h2:
     console:
       enabled: true
+
+kleague:
+  player:
+    csv-path: classpath:kleague_player_basic_stats.csv

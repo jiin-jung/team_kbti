@@ -1,8 +1,9 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>KBTI | K-League Tactics Index</title>
+    <title>KBTI | K-League Index</title>
     <style>
         :root {
             --primary: #00529b;
@@ -24,7 +25,7 @@
             border-radius: 24px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             width: 100%;
-            max-width: 900px;
+            max-width: 1100px;
         }
 
         header {
@@ -50,6 +51,24 @@
         h2 {
             margin: 0 0 14px;
             color: #333;
+        }
+
+        .section {
+            margin-top: 28px;
+        }
+
+        .section-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .section-top .right-actions a {
+            text-decoration: none;
+            font-weight: 700;
+            color: var(--primary);
         }
 
         .search-bar {
@@ -85,9 +104,16 @@
             background: #ccc;
         }
 
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 16px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 980px;
         }
 
         th, td {
@@ -95,6 +121,7 @@
             padding: 12px;
             text-align: center;
             font-size: 14px;
+            white-space: nowrap;
         }
 
         th {
@@ -140,6 +167,23 @@
             margin-top: 16px;
             display: none;
         }
+
+        .hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #ddd;
+            background: #fff;
+            font-weight: 700;
+            color: #333;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -149,57 +193,122 @@
     <header>
         <h1>KBTI</h1>
         <nav>
-            <a href="#">선수 목록</a>
+            <a href="/player-list.html">선수 랭킹</a>
             <a href="/team-list.html">팀 목록</a>
             <a href="/kbti-test.html">KBTI 테스트</a>
         </nav>
     </header>
 
-    <h2>K리그 팀 목록</h2>
+    <!-- 팀 랭킹 섹션 -->
+    <div class="section" id="teamSection">
+        <div class="section-top">
+            <h2>K리그 팀 순위표</h2>
+        </div>
 
-    <!-- 검색 -->
-    <div class="search-bar">
-        <input
-                id="searchInput"
-                class="search-input"
-                type="text"
-                placeholder="팀 이름으로 검색 (예: 울산, 전북, 포항)"
-        />
-        <button class="search-btn" id="clearBtn" type="button">초기화</button>
+        <div class="search-bar">
+            <input
+                    id="teamSearchInput"
+                    class="search-input"
+                    type="text"
+                    placeholder="팀 이름으로 검색 (예: 울산, 전북, 포항)"
+            />
+            <button class="search-btn" id="teamClearBtn" type="button">초기화</button>
+        </div>
+
+        <div class="table-wrap">
+            <table id="team-table">
+                <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>팀명</th>
+                    <th>경기수</th>
+                    <th>승점</th>
+                    <th>득실차</th>
+                    <th>승</th>
+                    <th>무</th>
+                    <th>패</th>
+                    <th>득점</th>
+                    <th>실점</th>
+                    <th>KBTI</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="hint">팀 행을 클릭하면 팀 상세 페이지로 이동합니다.</div>
+        <div id="teamNoResult" class="no-result">검색 결과가 없습니다.</div>
     </div>
 
-    <table id="team-table">
-        <thead>
-        <tr>
-            <th>번호</th>
-            <th>팀</th>
-            <th>Tempo</th>
-            <th>Directness</th>
-            <th>Pressing</th>
-            <th>Side Usage</th>
-            <th>Fight</th>
-            <th>KBTI</th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- JS로 자동 채움 -->
-        </tbody>
-    </table>
+    <!-- 선수 랭킹 섹션 -->
+    <div class="section" id="playerSection">
+        <div class="section-top">
+            <h2>선수 랭킹 (Top 30, 15경기 이상)</h2>
+            <div class="right-actions">
+                <a href="/player-list.html">전체 보기</a>
+            </div>
+        </div>
 
-    <div id="noResult" class="no-result">검색 결과가 없습니다.</div>
+        <div class="search-bar">
+            <input
+                    id="playerSearchInput"
+                    class="search-input"
+                    type="text"
+                    placeholder="선수/팀 이름으로 검색 (예: 주민규, 울산)"
+            />
+            <button class="search-btn" id="playerClearBtn" type="button">초기화</button>
+        </div>
+
+        <div class="table-wrap">
+            <table id="player-table">
+                <thead>
+                <tr>
+                    <th>순위</th>
+                    <th>선수명</th>
+                    <th>팀명</th>
+                    <th>포지션</th>
+                    <th>역할군</th>
+                    <th>경기수</th>
+                    <th>AI평점</th>
+                    <th>평가점수(Raw)</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="hint">선수 랭킹은 AI평점 기준으로 정렬된 결과를 표시합니다.</div>
+        <div id="playerNoResult" class="no-result">검색 결과가 없습니다.</div>
+    </div>
 
 </div>
 
 <script>
-    let allTeams = [];
-
+    // ----------------------------
+    // 공통 유틸
+    // ----------------------------
     function normalize(str) {
         return (str ?? '').toString().trim().toLowerCase();
     }
 
-    function renderTable(teams) {
+    function safeInt(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : '';
+    }
+
+    function safeFloat(v, digits = 2) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n.toFixed(digits) : '';
+    }
+
+    // ----------------------------
+    // 팀 랭킹
+    // ----------------------------
+    let allTeams = [];
+
+    function renderTeamTable(teams) {
         const tbody = document.querySelector('#team-table tbody');
-        const noResult = document.getElementById('noResult');
+        const noResult = document.getElementById('teamNoResult');
 
         tbody.innerHTML = '';
 
@@ -207,7 +316,6 @@
             noResult.style.display = 'block';
             return;
         }
-
         noResult.style.display = 'none';
 
         teams.forEach(team => {
@@ -218,57 +326,147 @@
                 : `<span class="empty">—</span>`;
 
             tr.innerHTML = `
-                <td>${team.rank ?? ''}</td>
+                <td>${safeInt(team.rank)}</td>
                 <td class="team-name">${team.teamName ?? ''}</td>
-                <td>${Number(team.tempo).toFixed(2)}</td>
-                <td>${Number(team.directness).toFixed(2)}</td>
-                <td>${Number(team.pressing).toFixed(2)}</td>
-                <td>${Number(team.sideUsage).toFixed(2)}</td>
-                <td>${Number(team.fight).toFixed(2)}</td>
+                <td>${safeInt(team.games)}</td>
+                <td>${safeInt(team.points)}</td>
+                <td>${safeInt(team.goalDiff)}</td>
+                <td>${safeInt(team.win)}</td>
+                <td>${safeInt(team.draw)}</td>
+                <td>${safeInt(team.loss)}</td>
+                <td>${safeInt(team.goalsFor)}</td>
+                <td>${safeInt(team.goalsAgainst)}</td>
                 <td>${kbti}</td>
             `;
 
             tr.onclick = () => {
-                location.href = `/team-detail.html?teamId=${team.teamId}`;
+                location.href = `/team-detail.html?teamId=${encodeURIComponent(team.teamId)}`;
             };
 
             tbody.appendChild(tr);
         });
     }
 
-    function applySearch() {
-        const q = normalize(document.getElementById('searchInput').value);
+    function applyTeamSearch() {
+        const q = normalize(document.getElementById('teamSearchInput').value);
         if (!q) {
-            renderTable(allTeams);
+            renderTeamTable(allTeams);
             return;
         }
-
         const filtered = allTeams.filter(t => normalize(t.teamName).includes(q));
-        renderTable(filtered);
+        renderTeamTable(filtered);
     }
 
     async function loadTeams() {
         try {
             const res = await fetch('/api/teams/rank');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             allTeams = await res.json();
-            renderTable(allTeams);
+            renderTeamTable(allTeams);
         } catch (e) {
             alert('팀 데이터를 불러오지 못했습니다.');
             console.error(e);
+            renderTeamTable([]);
         }
     }
 
+    // ----------------------------
+    // 선수 랭킹 (Index용 Top 30)
+    // ----------------------------
+    let allPlayers = [];
+
+    function renderPlayerTable(players) {
+        const tbody = document.querySelector('#player-table tbody');
+        const noResult = document.getElementById('playerNoResult');
+
+        tbody.innerHTML = '';
+
+        if (!players || players.length === 0) {
+            noResult.style.display = 'block';
+            return;
+        }
+        noResult.style.display = 'none';
+
+        players.forEach(p => {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td>${safeInt(p.rank)}</td>
+                <td class="team-name" style="color:#333;font-weight:800;">${p.playerName ?? ''}</td>
+                <td>${p.teamName ?? ''}</td>
+                <td>${p.position ?? ''}</td>
+                <td>${p.roleGroup ?? ''}</td>
+                <td>${safeInt(p.games)}</td>
+                <td>${safeFloat(p.aiRating, 2)}</td>
+                <td>${safeFloat(p.rawScore, 2)}</td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function applyPlayerSearch() {
+        const q = normalize(document.getElementById('playerSearchInput').value);
+        if (!q) {
+            renderPlayerTable(allPlayers);
+            return;
+        }
+        const filtered = allPlayers.filter(p =>
+            normalize(p.playerName).includes(q) || normalize(p.teamName).includes(q)
+        );
+        renderPlayerTable(filtered);
+    }
+
+    async function loadPlayersTop() {
+        // 백엔드가 파라미터를 지원하면 활용, 지원 안 해도 이후 프론트에서 컷합니다.
+        const minGames = 15;
+        const top = 30;
+
+        try {
+            const url = `/api/players/rank?minGames=${encodeURIComponent(minGames)}&top=${encodeURIComponent(top)}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            let data = await res.json();
+
+            // 백엔드에서 minGames/top을 안 걸어줘도 프론트에서 한 번 더 안전하게 처리
+            data = (data || [])
+                .filter(p => Number(p.games) >= minGames)
+                .slice(0, top);
+
+            allPlayers = data;
+            renderPlayerTable(allPlayers);
+
+        } catch (e) {
+            alert('선수 데이터를 불러오지 못했습니다.');
+            console.error(e);
+            renderPlayerTable([]);
+        }
+    }
+
+    // ----------------------------
+    // init
+    // ----------------------------
     window.onload = () => {
         loadTeams();
+        loadPlayersTop();
 
-        const input = document.getElementById('searchInput');
-        const clearBtn = document.getElementById('clearBtn');
+        // team events
+        const teamInput = document.getElementById('teamSearchInput');
+        const teamClearBtn = document.getElementById('teamClearBtn');
+        teamInput.addEventListener('input', applyTeamSearch);
+        teamClearBtn.addEventListener('click', () => {
+            teamInput.value = '';
+            renderTeamTable(allTeams);
+        });
 
-        input.addEventListener('input', applySearch);
-
-        clearBtn.addEventListener('click', () => {
-            input.value = '';
-            renderTable(allTeams);
+        // player events
+        const playerInput = document.getElementById('playerSearchInput');
+        const playerClearBtn = document.getElementById('playerClearBtn');
+        playerInput.addEventListener('input', applyPlayerSearch);
+        playerClearBtn.addEventListener('click', () => {
+            playerInput.value = '';
+            renderPlayerTable(allPlayers);
         });
     };
 </script>

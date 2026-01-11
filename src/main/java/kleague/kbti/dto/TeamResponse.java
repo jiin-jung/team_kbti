@@ -4,6 +4,8 @@ import kleague.kbti.util.KbtiCodeUtil;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class TeamResponse {
@@ -21,13 +23,17 @@ public class TeamResponse {
     // 팀 KBTI 코드
     private String teamKbti;
 
+    private String teamKbtiDesc;             // FSAD 한 줄 설명
+    private List<KbtiDimension> teamKbtiDetails; // 4글자 상세 해석
+
     // 기본: rank 없이
     public static TeamResponse from(TeamTactics t) {
         return from(null, t);
     }
 
-    // rank 포함 버전
     public static TeamResponse from(Integer rank, TeamTactics t) {
+        String kbti = t.getTeamKbti();
+
         return TeamResponse.builder()
                 .rank(rank)
                 .teamId(t.getTeamId())
@@ -37,7 +43,9 @@ public class TeamResponse {
                 .pressing(t.getPressing())
                 .sideUsage(t.getSideUsage())
                 .fight(t.getFight())
-                .teamKbti(t.getTeamKbti())
+                .teamKbti(kbti)
+                .teamKbtiDesc(KbtiCodeUtil.getDescription(kbti))
+                .teamKbtiDetails(KbtiCodeUtil.getDetails(kbti))
                 .build();
     }
 }

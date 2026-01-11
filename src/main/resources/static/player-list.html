@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>KBTI | Player Rankings</title>
+    <style>
+        :root {
+            --primary: #00529b;
+            --secondary: #e61e2b;
+            --bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 28px;
+            margin: 0;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        h2 {
+            margin: 0 0 14px;
+            color: #333;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: 1fr 220px 160px 160px 120px;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .input, .select {
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 2px solid #eee;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+        }
+
+        .input:focus, .select:focus {
+            border-color: var(--primary);
+            background: #eef6ff;
+        }
+
+        .btns {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .btn {
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: none;
+            background: #ddd;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #ccc;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 980px;
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .no-result {
+            padding: 18px;
+            text-align: center;
+            color: #666;
+            border: 2px dashed #ddd;
+            border-radius: 16px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .hint {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .player-name {
+            font-weight: 800;
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #ddd;
+            background: #fff;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        @media (max-width: 980px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>KBTI</h1>
+        <nav>
+            <a href="/index.html">홈</a>
+            <a href="/team-list.html">팀 목록</a>
+            <a href="/kbti-test.html">KBTI 테스트</a>
+        </nav>
+    </header>
+
+    <h2>선수 랭킹</h2>
+    <div class="hint">
+        <span style="margin-left:8px;">AI평점 기준 정렬, 최소 경기수/포지션(그룹) 필터 적용</span>
+    </div>
+
+    <!-- 필터 -->
+    <div class="filters">
+        <input id="qInput" class="input" type="text" placeholder="선수명 검색 (예: 주민규)" />
+        <input id="teamInput" class="input" type="text" placeholder="팀명 필터 (예: 울산)" />
+        <select id="posSelect" class="select">
+            <option value="">포지션(전체)</option>
+            <option value="GK">GK</option>
+            <option value="DF">DF</option>
+            <option value="MF">MF</option>
+            <option value="FW">FW</option>
+        </select>
+        <input id="minGamesInput" class="input" type="number" min="0" step="1" value="15" placeholder="최소 경기수" />
+        <input id="topInput" class="input" type="number" min="0" step="1" value="0" placeholder="Top (0=전체)" />
+    </div>
+
+    <div class="btns">
+        <button class="btn" id="applyBtn" type="button">적용</button>
+        <button class="btn" id="resetBtn" type="button">초기화</button>
+        <button class="btn" id="reloadBtn" type="button">다시 불러오기</button>
+    </div>
+
+    <div class="table-wrap">
+        <table id="player-table">
+            <thead>
+            <tr>
+                <th>순위</th>
+                <th>선수명</th>
+                <th>팀명</th>
+                <th>포지션</th>
+                <th>역할군</th>
+                <th>경기수</th>
+                <th>AI평점</th>
+                <th>평가점수(Raw)</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="noResult" class="no-result">검색 결과가 없습니다.</div>
+
+</div>
+
+<script>
+    let basePlayers = [];     // 서버에서 받은 원본
+    let viewPlayers = [];     // 화면에 표시할 필터 결과
+
+    function normalize(str) {
+        return (str ?? '').toString().trim().toLowerCase();
+    }
+
+    function safeInt(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : '';
+    }
+
+    function safeFloat(v, digits = 2) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n.toFixed(digits) : '';
+    }
+
+    // 상세 포지션 -> 그룹(GK/DF/MF/FW) 매핑
+    // GK: GK
+    // DF: CB,RB,LB,LWB,RWB
+    // MF: CDM,CM,RM,LM,CAM
+    // FW: LW,RW,RF,LF,CF
+    function toPosGroup(pos) {
+        const p = (pos ?? '').toString().trim().toUpperCase().replace(/\s+/g, '');
+
+        const GK = new Set(['GK']);
+        const DF = new Set(['CB', 'RB', 'LB', 'LWB', 'RWB']);
+        const MF = new Set(['CDM', 'CM', 'RM', 'LM', 'CAM']);
+        const FW = new Set(['LW', 'RW', 'RF', 'LF', 'CF']);
+
+        if (GK.has(p)) return 'GK';
+        if (DF.has(p)) return 'DF';
+        if (MF.has(p)) return 'MF';
+        if (FW.has(p)) return 'FW';
+
+        return '';
+    }
+
+    function render(players) {
+        const tbody = document.querySelector('#player-table tbody');
+        const noResult = document.getElementById('noResult');
+
+        tbody.innerHTML = '';
+
+        if (!players || players.length === 0) {
+            noResult.style.display = 'block';
+            return;
+        }
+        noResult.style.display = 'none';
+
+        players.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${safeInt(p.rank)}</td>
+                <td class="player-name">${p.playerName ?? ''}</td>
+                <td>${p.teamName ?? ''}</td>
+                <td>${p.position ?? ''}</td>
+                <td>${p.roleGroup ?? ''}</td>
+                <td>${safeInt(p.games)}</td>
+                <td>${safeFloat(p.aiRating, 2)}</td>
+                <td>${safeFloat(p.rawScore, 2)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function applyFilters() {
+        const q = normalize(document.getElementById('qInput').value);
+        const team = normalize(document.getElementById('teamInput').value);
+        const posGroup = (document.getElementById('posSelect').value || '').toUpperCase(); // GK/DF/MF/FW
+        const minGames = Number(document.getElementById('minGamesInput').value || 0);
+        const top = Number(document.getElementById('topInput').value || 0);
+
+        let filtered = basePlayers.slice();
+
+        if (Number.isFinite(minGames) && minGames > 0) {
+            filtered = filtered.filter(p => Number(p.games) >= minGames);
+        }
+
+        if (team) {
+            filtered = filtered.filter(p => normalize(p.teamName).includes(team));
+        }
+
+        // 포지션 그룹 필터 (DF 선택 시 CB/LB/RB/LWB/RWB 모두 포함)
+        if (posGroup) {
+            filtered = filtered.filter(p => toPosGroup(p.position) === posGroup);
+        }
+
+        if (q) {
+            filtered = filtered.filter(p => normalize(p.playerName).includes(q));
+        }
+
+        // 화면용 rank 재부여 (필터 후 순위가 끊기는 문제 방지)
+        filtered = filtered.map((p, idx) => ({ ...p, rank: idx + 1 }));
+
+        if (Number.isFinite(top) && top > 0) {
+            filtered = filtered.slice(0, top);
+        }
+
+        viewPlayers = filtered;
+        render(viewPlayers);
+    }
+
+    async function loadPlayers() {
+        const minGames = Number(document.getElementById('minGamesInput').value || 0);
+        const top = Number(document.getElementById('topInput').value || 0);
+
+        // 백엔드가 파라미터 지원하면 활용, 지원 안 해도 프론트에서 다시 필터링
+        const qs = [];
+        if (Number.isFinite(minGames) && minGames > 0) qs.push(`minGames=${encodeURIComponent(minGames)}`);
+        if (Number.isFinite(top) && top > 0) qs.push(`top=${encodeURIComponent(top)}`);
+        const url = `/api/players/rank${qs.length ? `?${qs.join('&')}` : ''}`;
+
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+            basePlayers = Array.isArray(data) ? data : [];
+
+            // rank가 없거나 이상하면 임시로 부여
+            basePlayers = basePlayers.map((p, idx) => ({
+                ...p,
+                rank: Number.isFinite(Number(p.rank)) ? Number(p.rank) : (idx + 1)
+            }));
+
+            applyFilters();
+
+        } catch (e) {
+            alert('선수 데이터를 불러오지 못했습니다.');
+            console.error(e);
+            basePlayers = [];
+            render([]);
+        }
+    }
+
+    function resetUI() {
+        document.getElementById('qInput').value = '';
+        document.getElementById('teamInput').value = '';
+        document.getElementById('posSelect').value = '';
+        document.getElementById('minGamesInput').value = '15';
+        document.getElementById('topInput').value = '0';
+    }
+
+    window.onload = () => {
+        document.getElementById('applyBtn').addEventListener('click', applyFilters);
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            resetUI();
+            applyFilters();
+        });
+        document.getElementById('reloadBtn').addEventListener('click', loadPlayers);
+
+        // 엔터로 적용
+        document.getElementById('qInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+        document.getElementById('teamInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+
+        loadPlayers();
+    };
+</script>
+
+</body>
+</html>

@@ -1,30 +1,39 @@
 package kleague.kbti.service;
 
+import kleague.kbti.dto.TeamRankResponse;
+import kleague.kbti.dto.TeamRankingRow;
 import kleague.kbti.dto.TeamResponse;
 import kleague.kbti.dto.TeamTactics;
+import kleague.kbti.loader.TeamRankingCsvLoader;
 import kleague.kbti.loader.TeamTacticsCsvLoader;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TeamQueryService {
 
     private final List<TeamTactics> teams;
+    private final List<TeamRankingRow> rankings;
 
-    public TeamQueryService(TeamTacticsCsvLoader loader) {
+    public TeamQueryService(
+            TeamTacticsCsvLoader loader,
+            TeamRankingCsvLoader rankingLoader
+    ) {
         this.teams = loader.load();
+        this.rankings = rankingLoader.load();
     }
 
-    // 전체 조회 (/api/teams)
+    // 전체 팀 (랭킹 없음)
     public List<TeamResponse> findAll() {
         return teams.stream()
                 .map(TeamResponse::from)
                 .toList();
     }
 
-    // 단일 조회 (/api/teams/{id})
+    // 단일 팀 조회
     public TeamResponse findById(int teamId) {
         TeamTactics team = teams.stream()
                 .filter(t -> t.getTeamId() == teamId)
@@ -36,14 +45,21 @@ public class TeamQueryService {
         return TeamResponse.from(team);
     }
 
-    // 이름순 + rank 부여 < 추후에 실제 순위로 변경
-    public List<TeamResponse> findAllSortedByRank() {
-        List<TeamTactics> sorted = teams.stream()
-                .sorted(Comparator.comparing(TeamTactics::getTeamName))
-                .toList();
+    // 랭킹 기준 조회
+    public List<TeamRankResponse> findAllSortedByRank() {
+        Map<String, TeamTactics> teamMap = teams.stream()
+                .collect(Collectors.toMap(TeamTactics::getTeamName, t -> t));
 
-        return java.util.stream.IntStream.range(0, sorted.size())
-                .mapToObj(i -> TeamResponse.from(i + 1, sorted.get(i))) // rank + teamKbti 포함
+        return rankings.stream()
+                .map(r -> {
+                    TeamTactics team = teamMap.get(r.getTeamName());
+                    if (team == null) {
+                        throw new IllegalStateException(
+                                "랭킹 CSV의 팀명이 전술 데이터와 매칭되지 않음: " + r.getTeamName()
+                        );
+                    }
+                    return TeamRankResponse.from(r, team);
+                })
                 .toList();
     }
 }
