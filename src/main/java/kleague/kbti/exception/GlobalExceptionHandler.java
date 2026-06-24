@@ -2,9 +2,10 @@ package kleague.kbti.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import kleague.kbti.exception.code.CommonErrorCode;
+import kleague.kbti.exception.code.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,13 +30,14 @@ public class GlobalExceptionHandler {
                 .toList();
 
         ErrorResponse response = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "INVALID_REQUEST",
-                "요청 값이 올바르지 않습니다.",
+                CommonErrorCode.INVALID_REQUEST.status().value(),
+                CommonErrorCode.INVALID_REQUEST.domain().name(),
+                CommonErrorCode.INVALID_REQUEST.code(),
+                CommonErrorCode.INVALID_REQUEST.message(),
                 request.getRequestURI(),
                 fieldErrors
         );
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(CommonErrorCode.INVALID_REQUEST.status()).body(response);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -52,50 +54,43 @@ public class GlobalExceptionHandler {
                 .toList();
 
         ErrorResponse response = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "INVALID_REQUEST",
-                "요청 값이 올바르지 않습니다.",
+                CommonErrorCode.INVALID_REQUEST.status().value(),
+                CommonErrorCode.INVALID_REQUEST.domain().name(),
+                CommonErrorCode.INVALID_REQUEST.code(),
+                CommonErrorCode.INVALID_REQUEST.message(),
                 request.getRequestURI(),
                 fieldErrors
         );
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(CommonErrorCode.INVALID_REQUEST.status()).body(response);
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFound(
-            ResourceNotFoundException exception,
-            HttpServletRequest request
-    ) {
+    @ExceptionHandler(KbtiException.class)
+    public ResponseEntity<ErrorResponse> handleKbtiException(KbtiException exception, HttpServletRequest request) {
+        ErrorCode errorCode = exception.getErrorCode();
+        if (errorCode.status().is5xxServerError()) {
+            log.error("Domain error occurred. domain={}, code={}", errorCode.domain(), errorCode.code(), exception);
+        }
+
         ErrorResponse response = ErrorResponse.of(
-                HttpStatus.NOT_FOUND.value(),
-                "RESOURCE_NOT_FOUND",
+                errorCode.status().value(),
+                errorCode.domain().name(),
+                errorCode.code(),
                 exception.getMessage(),
                 request.getRequestURI()
         );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
-
-    @ExceptionHandler(DataLoadException.class)
-    public ResponseEntity<ErrorResponse> handleDataLoad(DataLoadException exception, HttpServletRequest request) {
-        log.error("Data load failed", exception);
-        ErrorResponse response = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "DATA_LOAD_FAILED",
-                "데이터를 불러오는 중 문제가 발생했습니다.",
-                request.getRequestURI()
-        );
-        return ResponseEntity.internalServerError().body(response);
+        return ResponseEntity.status(errorCode.status()).body(response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception, HttpServletRequest request) {
         log.error("Unexpected API error", exception);
         ErrorResponse response = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "INTERNAL_SERVER_ERROR",
-                "서버 내부 오류가 발생했습니다.",
+                CommonErrorCode.INTERNAL_SERVER_ERROR.status().value(),
+                CommonErrorCode.INTERNAL_SERVER_ERROR.domain().name(),
+                CommonErrorCode.INTERNAL_SERVER_ERROR.code(),
+                CommonErrorCode.INTERNAL_SERVER_ERROR.message(),
                 request.getRequestURI()
         );
-        return ResponseEntity.internalServerError().body(response);
+        return ResponseEntity.status(CommonErrorCode.INTERNAL_SERVER_ERROR.status()).body(response);
     }
 }

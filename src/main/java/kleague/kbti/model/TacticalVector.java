@@ -1,5 +1,8 @@
 package kleague.kbti.model;
 
+import kleague.kbti.exception.code.RecommendationErrorCode;
+import kleague.kbti.exception.domain.RecommendationException;
+
 import java.util.Arrays;
 
 public record TacticalVector(double tempo, double directness, double pressing, double sideUsage, double fight) {
@@ -13,7 +16,7 @@ public record TacticalVector(double tempo, double directness, double pressing, d
         double[] target = other.values();
 
         if (current.length != target.length) {
-            throw new IllegalArgumentException("전술 벡터 차원이 일치하지 않습니다.");
+            throw new RecommendationException(RecommendationErrorCode.VECTOR_DIMENSION_MISMATCH);
         }
 
         double sum = 0;

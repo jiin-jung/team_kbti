@@ -1,5 +1,7 @@
 package kleague.kbti.recommendation.matcher;
 
+import kleague.kbti.exception.code.RecommendationErrorCode;
+import kleague.kbti.exception.domain.RecommendationException;
 import kleague.kbti.model.TacticalVector;
 import kleague.kbti.model.TeamTactics;
 import org.junit.jupiter.api.Test;
@@ -29,7 +31,8 @@ class EuclideanTeamMatcherTest {
     @Test
     void rejectsEmptyTeamData() {
         assertThatThrownBy(() -> matcher.findBestMatch(new TacticalVector(1, 1, 1, 1, 1), List.of()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("팀 전술 데이터");
+                .isInstanceOf(RecommendationException.class)
+                .extracting("errorCode")
+                .isEqualTo(RecommendationErrorCode.TEAM_TACTICS_EMPTY);
     }
 }
