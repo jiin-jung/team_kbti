@@ -196,9 +196,48 @@ src/main/java/kleague/kbti
 - Database: MySQL
 - Data Source: K리그 경기·전술 CSV
 - Analysis: Euclidean Distance 기반 벡터 유사도
+- Monitoring: Spring Boot Actuator, Micrometer, Prometheus, Grafana
+- Review Automation: CodeRabbit
 
 ---
 
-## 7. 한 줄 요약
+## 7. 모니터링
+
+애플리케이션 실행 후 Actuator Prometheus endpoint가 열립니다.
+
+```bash
+./gradlew bootRun
+```
+
+```text
+http://localhost:8080/actuator/health
+http://localhost:8080/actuator/prometheus
+```
+
+Prometheus와 Grafana는 Docker Compose로 실행합니다.
+
+```bash
+docker compose up -d
+```
+
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000`
+- Grafana 기본 계정: `admin` / `admin`
+
+Prometheus는 기본적으로 `host.docker.internal:8080/actuator/prometheus`를 수집합니다. 애플리케이션 포트를 바꾸면 `monitoring/prometheus/prometheus.yml`의 target도 함께 바꿔야 합니다.
+
+---
+
+## 8. CodeRabbit
+
+`.coderabbit.yaml`에서 PR 리뷰 자동화 기본값을 관리합니다.
+
+- 리뷰 언어: 한국어
+- 자동 리뷰 대상 기본 브랜치: `jiin`, `main`
+- 빌드 산출물과 Gradle 캐시는 리뷰 대상에서 제외
+
+---
+
+## 9. 한 줄 요약
 
 > K-BTI는 축구 데이터를 성향과 취향의 언어로 번역하는 데이터 기반 팀 추천 서비스입니다.
