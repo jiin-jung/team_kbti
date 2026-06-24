@@ -6,7 +6,6 @@ import kleague.kbti.dto.response.KbtiResponse;
 import kleague.kbti.service.KbtiService;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/kbti")
 public class KbtiController {

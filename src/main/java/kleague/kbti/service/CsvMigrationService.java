@@ -1,7 +1,10 @@
 package kleague.kbti.service;
 
 import kleague.kbti.domain.TeamEntity;
+import kleague.kbti.exception.DataLoadException;
 import kleague.kbti.repository.TeamRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class CsvMigrationService {
 
+    private static final Logger log = LoggerFactory.getLogger(CsvMigrationService.class);
+
     private final TeamRepository teamRepository;
 
     public CsvMigrationService(TeamRepository teamRepository) {
@@ -22,13 +27,12 @@ public class CsvMigrationService {
     @Transactional
     public void migrateData() {
         try {
-            teamRepository.deleteAll(); // 기존 데이터 초기화 (선택 사항)
+            teamRepository.deleteAll();
             parseKbtiCsv();
             parseDetailedCsv();
-            System.out.println("✅ [성공] 모든 K리그 데이터 마이그레이션 완료!");
+            log.info("K리그 데이터 마이그레이션 완료");
         } catch (Exception e) {
-            System.err.println("❌ [오류] 마이그레이션 중 에러 발생: " + e.getMessage());
-            e.printStackTrace();
+            throw new DataLoadException("K리그 데이터 마이그레이션 실패", e);
         }
     }
 

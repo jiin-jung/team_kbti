@@ -1,5 +1,6 @@
 package kleague.kbti.loader;
 
+import kleague.kbti.exception.DataLoadException;
 import kleague.kbti.model.TacticalVector;
 import kleague.kbti.model.TeamTactics;
 import org.springframework.core.io.ClassPathResource;
@@ -47,7 +48,7 @@ public class TeamTacticsCsvLoader {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("kleague_kbti_service.csv 로드 실패", e);
+            throw new DataLoadException("kleague_kbti_service.csv 로드 실패", e);
         }
 
         return list;

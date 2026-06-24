@@ -1,12 +1,15 @@
 package kleague.kbti.controller;
 
+import jakarta.validation.constraints.Positive;
 import kleague.kbti.dto.response.TeamRankResponse;
 import kleague.kbti.dto.response.TeamResponse;
 import kleague.kbti.service.TeamQueryService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/teams")
 public class TeamController {
@@ -28,7 +31,7 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}")
-    public TeamResponse getTeam(@PathVariable int teamId) {
+    public TeamResponse getTeam(@Positive @PathVariable int teamId) {
         return teamQueryService.findById(teamId);
     }
 }

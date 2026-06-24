@@ -39,6 +39,14 @@ src/main/java/kleague/kbti
  ┃ ┣ code
  ┃ ┣ matcher
  ┃ ┗ vector
+ ┣ mapper
+ ┃ ┣ TeamResponseMapper.java
+ ┃ ┗ PlayerResponseMapper.java
+ ┣ exception
+ ┃ ┣ GlobalExceptionHandler.java
+ ┃ ┗ ErrorResponse.java
+ ┣ config
+ ┃ ┗ WebConfig.java
  ┣ model
  ┃ ┣ TeamTactics.java
  ┃ ┣ TacticalVector.java
@@ -75,7 +83,7 @@ src/main/java/kleague/kbti
 
 ### service
 
-서비스 계층은 비즈니스 흐름을 조합합니다. 추천 규칙, 벡터 변환, 거리 계산처럼 변경 가능성이 큰 세부 구현은 `recommendation` 패키지의 인터페이스 뒤로 분리했습니다.
+서비스 계층은 비즈니스 흐름을 조합합니다. 추천 규칙, 벡터 변환, 거리 계산처럼 변경 가능성이 큰 세부 구현은 `recommendation` 패키지의 인터페이스 뒤로 분리했습니다. 응답 DTO 조립은 `mapper` 패키지로 분리해 서비스가 조회/필터링 흐름에 집중하도록 했습니다.
 
 #### CsvMigrationService
 
@@ -100,6 +108,22 @@ src/main/java/kleague/kbti
 - 기본 구현은 임계값 기반 코드 생성, 20점 스케일 벡터 변환, 유클리드 거리 매칭을 사용
 
 새 추천 알고리즘이나 코드 생성 규칙을 추가할 때 기존 서비스 수정 대신 새 구현체를 추가해 교체할 수 있도록 OCP 기준으로 분리했습니다.
+
+---
+
+### exception
+
+- `GlobalExceptionHandler`: validation, not found, data load 실패를 표준 에러 응답으로 변환
+- `ErrorResponse`: API 에러 응답 공통 포맷
+- `ResourceNotFoundException`, `DataLoadException`: 서비스/로더 계층의 의미 있는 예외 타입
+
+---
+
+### config
+
+- `WebConfig`: API CORS 정책 관리
+- `KbtiApiProperties`: `kbti.api.allowed-origins` 설정 바인딩
+- 기본 profile은 H2 console과 SQL 로그를 끄고, `dev` profile에서 개발 편의 설정을 켭니다.
 
 ---
 

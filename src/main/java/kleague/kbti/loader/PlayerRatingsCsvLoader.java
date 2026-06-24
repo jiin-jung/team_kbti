@@ -1,5 +1,6 @@
 package kleague.kbti.loader;
 
+import kleague.kbti.exception.DataLoadException;
 import kleague.kbti.loader.row.PlayerRatingRow;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,7 @@ public class PlayerRatingsCsvLoader {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("kleague_player_ratings_final_v2.csv 로드 실패", e);
+            throw new DataLoadException("kleague_player_ratings_final_v2.csv 로드 실패", e);
         }
     }
 
