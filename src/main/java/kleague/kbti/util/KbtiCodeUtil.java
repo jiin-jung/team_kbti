@@ -1,6 +1,6 @@
 package kleague.kbti.util;
 
-import kleague.kbti.dto.KbtiDimension;
+import kleague.kbti.model.KbtiDimension;
 
 import java.util.List;
 import java.util.Map;

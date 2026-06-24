@@ -1,7 +1,7 @@
 package kleague.kbti.service;
 
-import kleague.kbti.dto.PlayerRankResponse;
-import kleague.kbti.dto.PlayerRatingRow;
+import kleague.kbti.dto.response.PlayerRankResponse;
+import kleague.kbti.loader.row.PlayerRatingRow;
 import kleague.kbti.loader.PlayerRatingsCsvLoader;
 import org.springframework.stereotype.Service;
 
@@ -55,12 +55,21 @@ public class PlayerQueryService {
         int limit = (top == null || top <= 0) ? sorted.size() : Math.min(top, sorted.size());
 
         return IntStream.range(0, limit)
-                .mapToObj(i -> PlayerRankResponse.from(i + 1, sorted.get(i)))
+                .mapToObj(i -> toResponse(i + 1, sorted.get(i)))
                 .toList();
     }
 
-    private double totalScore(PlayerRatingRow p) {
-        return p.getRawScore() + p.getAiRating();
+    private PlayerRankResponse toResponse(int rank, PlayerRatingRow row) {
+        return PlayerRankResponse.builder()
+                .rank(rank)
+                .playerName(row.getPlayerName())
+                .teamName(row.getTeamName())
+                .position(row.getPosition())
+                .roleGroup(row.getRoleGroup())
+                .rawScore(row.getRawScore())
+                .games(row.getGames())
+                .aiRating(row.getAiRating())
+                .build();
     }
 
     private String toPosGroup(String pos) {

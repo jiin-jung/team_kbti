@@ -1,6 +1,6 @@
 package kleague.kbti.controller;
 
-import kleague.kbti.dto.PlayerRankResponse;
+import kleague.kbti.dto.response.PlayerRankResponse;
 import kleague.kbti.service.PlayerQueryService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

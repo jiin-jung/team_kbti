@@ -1,6 +1,6 @@
 package kleague.kbti.loader;
 
-import kleague.kbti.dto.TeamRankingRow;
+import kleague.kbti.loader.row.TeamRankingRow;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
