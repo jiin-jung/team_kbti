@@ -226,6 +226,7 @@ K-BTI는 이런 전술적 차이를 `tempo`, `directness`, `pressing`, `sideUsag
         <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white"/>
         <img src="https://img.shields.io/badge/Gradle-02303A?style=flat&logo=gradle&logoColor=white"/>
         <img src="https://img.shields.io/badge/JUnit5-25A162?style=flat&logo=junit5&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=black"/>
         <img src="https://img.shields.io/badge/CodeRabbit-FF5700?style=flat"/>
       </td>
     </tr>
@@ -277,6 +278,13 @@ src/main/java/kleague/kbti
 ---
 
 ## API 명세
+
+Swagger UI와 OpenAPI JSON은 애플리케이션 실행 후 아래 경로에서 확인할 수 있습니다.
+
+```text
+http://localhost:8080/swagger-ui.html
+http://localhost:8080/v3/api-docs
+```
 
 ### KBTI 추천
 
