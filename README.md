@@ -1,165 +1,288 @@
-# ⚽ K-BTI
-### 야구의 OPS처럼, 축구의 보이지 않는 가치를 수치화하다
+# K-BTI - K리그 전술 성향 기반 팀 추천 서비스
 
-K-BTI는 K리그 경기·전술 데이터를 기반으로 사용자의 축구 성향을 정량화하고, 가장 잘 맞는 K리그 팀을 데이터 기반으로 추천하는 서비스입니다.
+<div align="center">
+  <h1>K-BTI</h1>
+  <p>⚽ 데이터로 찾는 나와 가장 닮은 K리그 팀 ⚽</p>
+</div>
+
+<br/>
+
+<div align="center">
+  <!-- K-BTI 메인 화면 또는 서비스 대표 배너 -->
+  <sub>K-BTI 대표 이미지 추가 예정</sub>
+</div>
+
+<br/>
+
+<div align="center">
+  <a href="src/main/resources/static/index.html">홈 화면</a>
+  &nbsp; | &nbsp;
+  <a href="src/main/resources/static/kbti-test.html">K-BTI 테스트</a>
+  &nbsp; | &nbsp;
+  <a href="src/main/resources/static/team-list.html">팀 목록</a>
+  &nbsp; | &nbsp;
+  <a href="src/main/resources/static/player-list.html">선수 랭킹</a>
+</div>
 
 ---
 
-## 1. 프로젝트 개요
+## 프로젝트 개요
 
-- 기존 축구 평가는 득점, 도움 등 단편적 기록에 집중되어 있음
-- 수비, 압박, 전술적 기여도는 수치로 설명되기 어려움
-- K-BTI는 팀 전술 데이터를 **성향 벡터**로 재구성하여 사용자 취향과 동일한 수치 공간에서 매칭함
-
----
-
-## 2. 핵심 아이디어
-
-- 사용자 축구 취향 → **취향 벡터**
-- K리그 팀 전술 데이터 → **전술 벡터**
-- 두 벡터 간 **유클리드 거리(Euclidean Distance)** 기반 유사도 계산
-- 가장 유사한 팀을 추천
+- **프로젝트명:** K-BTI
+- **프로젝트 형태:** K리그 데이터 기반 WEB 서비스
+- **서비스 상태:** 개발 및 리팩토링 진행 중
+- **목표:** 사용자의 축구 취향을 전술 벡터로 정량화하고, K리그 팀 전술 데이터와 비교해 가장 잘 맞는 팀을 추천
+- **주요 타겟 사용자:**
+  - 나와 성향이 맞는 K리그 팀을 찾고 싶은 사용자
+  - 팀별 전술 성향을 직관적으로 비교하고 싶은 사용자
+  - K리그 팀 순위와 선수 랭킹을 함께 확인하고 싶은 사용자
 
 ---
 
-## 3. 패키지 구조
+## 프로젝트 소개
+
+### 프로젝트 배경
+
+축구 팀의 매력은 득점, 도움, 승점 같은 단편적인 기록만으로 설명하기 어렵습니다. 어떤 팀은 빠른 전환과 강한 압박이 매력이고, 어떤 팀은 짧은 패스와 안정적인 빌드업으로 경기를 지배합니다.
+
+K-BTI는 이런 전술적 차이를 `tempo`, `directness`, `pressing`, `sideUsage`, `fight` 같은 수치 지표로 재구성합니다. 사용자의 축구 취향도 같은 기준의 벡터로 변환한 뒤, 팀 전술 벡터와의 유클리드 거리를 계산해 가장 가까운 팀을 추천합니다.
+
+### 사용자 니즈
+
+⚽ **팀 추천**
+
+- 내 축구 취향과 잘 맞는 K리그 팀을 알고 싶음
+- 단순 인기나 순위가 아니라 전술 성향 기준으로 팀을 추천받고 싶음
+- 추천 결과를 KBTI 코드와 설명으로 직관적으로 이해하고 싶음
+
+📊 **팀 정보 탐색**
+
+- K리그 팀별 전개 속도, 패스 직선성, 압박 강도, 투지 지표를 비교하고 싶음
+- 팀별 KBTI 코드와 상세 해석을 확인하고 싶음
+- 팀 순위와 전술 성향을 함께 보고 싶음
+
+🏃 **선수 랭킹**
+
+- AI 평점과 raw score 기준으로 선수를 비교하고 싶음
+- 팀, 포지션, 최소 경기 수 조건으로 선수 랭킹을 필터링하고 싶음
+- 상위 선수 목록을 빠르게 확인하고 싶음
+
+---
+
+## 프로젝트 목표
+
+1. **사용자 축구 취향을 정량화하는 KBTI 테스트 제공**
+
+2. **K리그 팀 전술 데이터를 기반으로 한 팀 추천 시스템 구축**
+
+3. **팀 전술 성향, 순위, 선수 랭킹을 함께 확인할 수 있는 API 제공**
+
+4. **OCP를 고려한 추천 전략 확장 구조 설계**
+
+5. **Prometheus와 Grafana 기반 서비스 모니터링 환경 구성**
+
+---
+
+## 주요 기능
+
+### 1. K-BTI 팀 추천
+
+- 사용자 취향 입력값을 1~5점 척도로 수집
+- 취향 데이터를 전술 벡터로 변환
+- K리그 팀 전술 벡터와 유클리드 거리 기반 비교
+- 가장 가까운 팀과 KBTI 코드, 성향 설명 반환
+
+<div align="center">
+  <!-- K-BTI 테스트 화면 또는 추천 결과 화면 -->
+  <sub>K-BTI 추천 시연 이미지 추가 예정</sub>
+</div>
+
+<br/>
+
+### 2. 팀 전술 정보 조회
+
+- 전체 팀 전술 지표 조회
+- 팀 ID 기반 단일 팀 상세 조회
+- 팀별 KBTI 코드와 코드 상세 설명 제공
+- 전개 속도, 패스 직선성, 압박 강도, 측면 활용, 투지 지표 제공
+
+<div align="center">
+  <!-- 팀 목록 및 팀 상세 화면 -->
+  <sub>팀 전술 정보 시연 이미지 추가 예정</sub>
+</div>
+
+<br/>
+
+### 3. K리그 팀 순위 조회
+
+- CSV 기반 K리그 팀 순위 데이터 로드
+- 순위, 경기 수, 승점, 득실차, 승무패, 득점, 실점 제공
+- 순위 데이터와 팀 전술 데이터를 매칭해 KBTI 코드 함께 제공
+
+<div align="center">
+  <!-- 팀 순위 화면 -->
+  <sub>팀 순위 시연 이미지 추가 예정</sub>
+</div>
+
+<br/>
+
+### 4. 선수 랭킹 조회
+
+- AI 평점 기준 선수 랭킹 제공
+- 팀명, 포지션 그룹, 최소 경기 수 필터 제공
+- AI 평점, raw score, 경기 수 기준 정렬
+
+<div align="center">
+  <!-- 선수 랭킹 화면 -->
+  <sub>선수 랭킹 시연 이미지 추가 예정</sub>
+</div>
+
+<br/>
+
+### 5. API 예외 처리 및 요청 검증
+
+- 공통 에러 응답 포맷 제공
+- request body validation 처리
+- path variable, query parameter 검증
+- 존재하지 않는 리소스와 데이터 로딩 실패를 명확한 예외 타입으로 분리
+
+```json
+{
+  "timestamp": "2026-06-24T00:00:00Z",
+  "status": 400,
+  "code": "INVALID_REQUEST",
+  "message": "요청 값이 올바르지 않습니다.",
+  "path": "/api/kbti/test",
+  "fieldErrors": []
+}
+```
+
+<br/>
+
+### 6. 모니터링 및 코드 리뷰 자동화
+
+- Spring Boot Actuator health, metrics, prometheus endpoint 제공
+- Prometheus scrape 설정 제공
+- Grafana datasource 자동 등록
+- CodeRabbit PR 리뷰 설정 제공
+
+---
+
+## 팀원 소개
+
+| 이름 | 역할 | 담당 업무 |
+|:---:|:---:|:---|
+| <a href="https://github.com/jiin-jung"><img src="https://github.com/jiin-jung.png" width="70px"/><br/><sub><b>정지인</b></sub></a> | BE | K-BTI 추천 API, 팀/선수 조회 API, 구조 리팩토링, 모니터링 구성 |
+
+---
+
+## 기술 스택
+
+<table>
+  <thead>
+    <tr>
+      <th>분류</th>
+      <th>기술 스택</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Backend</td>
+      <td>
+        <img src="https://img.shields.io/badge/Java_21-007396?style=flat&logo=openjdk&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=flat&logo=springboot&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Spring_WebMVC-6DB33F?style=flat&logo=spring&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Spring_Validation-6DB33F?style=flat&logo=spring&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=flat&logo=spring&logoColor=white"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Database & Data</td>
+      <td>
+        <img src="https://img.shields.io/badge/H2-09476B?style=flat"/>
+        <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white"/>
+        <img src="https://img.shields.io/badge/CSV_Data-217346?style=flat"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td>
+        <img src="https://img.shields.io/badge/Euclidean_Distance-111111?style=flat"/>
+        <img src="https://img.shields.io/badge/Vector_Matching-0052CC?style=flat"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Monitoring</td>
+      <td>
+        <img src="https://img.shields.io/badge/Spring_Actuator-6DB33F?style=flat&logo=spring&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Micrometer-1F2937?style=flat"/>
+        <img src="https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Infra & Tooling</td>
+      <td>
+        <img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Gradle-02303A?style=flat&logo=gradle&logoColor=white"/>
+        <img src="https://img.shields.io/badge/JUnit5-25A162?style=flat&logo=junit5&logoColor=white"/>
+        <img src="https://img.shields.io/badge/CodeRabbit-FF5700?style=flat"/>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## 시스템 아키텍처
 
 ```text
-src/main/java/kleague/kbti
- ┣ controller
- ┃ ┣ KbtiController.java
- ┃ ┣ TeamController.java
- ┃ ┗ PlayerController.java
- ┣ service
- ┃ ┣ KbtiService.java
- ┃ ┣ TeamQueryService.java
- ┃ ┣ PlayerQueryService.java
- ┃ ┗ CsvMigrationService.java
- ┣ recommendation
- ┃ ┣ code
- ┃ ┣ matcher
- ┃ ┗ vector
- ┣ mapper
- ┃ ┣ TeamResponseMapper.java
- ┃ ┗ PlayerResponseMapper.java
- ┣ exception
- ┃ ┣ GlobalExceptionHandler.java
- ┃ ┗ ErrorResponse.java
- ┣ config
- ┃ ┗ WebConfig.java
- ┣ model
- ┃ ┣ TeamTactics.java
- ┃ ┣ TacticalVector.java
- ┃ ┗ KbtiDimension.java
- ┣ domain
- ┃ ┗ TeamEntity.java
- ┣ repository
- ┃ ┣ TeamRepository.java
- ┃ ┗ TeamTacticsRepository.java
- ┣ loader
- ┃ ┣ TeamTacticsCsvLoader.java
- ┃ ┣ TeamRankingCsvLoader.java
- ┃ ┣ PlayerRatingsCsvLoader.java
- ┃ ┗ row
- ┣ dto
- ┃ ┣ request
- ┃ ┗ response
- ┗ KbtiApplication.java
+Client
+  └─ Static HTML
+       └─ Spring Boot API
+            ├─ KBTI Recommendation
+            │   ├─ KbtiCodeGenerator
+            │   ├─ PreferenceVectorMapper
+            │   └─ TeamMatcher
+            ├─ CSV Loader
+            │   ├─ Team tactics data
+            │   ├─ Team ranking data
+            │   └─ Player rating data
+            ├─ H2 / MySQL
+            └─ Actuator
+                 └─ Prometheus
+                      └─ Grafana
 ```
 
 ---
 
-## 4. 패키지별 역할 설명
+## 패키지 구조
 
-### controller
-
-#### KbtiController
-
-- 사용자 요청 진입점
-- `/api/kbti/test` 엔드포인트 제공
-- 사용자 축구 취향 데이터를 서비스 레이어로 전달
-
----
-
-### service
-
-서비스 계층은 비즈니스 흐름을 조합합니다. 추천 규칙, 벡터 변환, 거리 계산처럼 변경 가능성이 큰 세부 구현은 `recommendation` 패키지의 인터페이스 뒤로 분리했습니다. 응답 DTO 조립은 `mapper` 패키지로 분리해 서비스가 조회/필터링 흐름에 집중하도록 했습니다.
-
-#### CsvMigrationService
-
-- K리그 팀 전술 데이터 CSV 파일을 읽어 DB에 저장
-- 모든 팀 데이터를 동일 기준으로 정규화
-- 추천 시스템의 지식 베이스 역할
-
-#### KbtiService
-
-- 서비스 핵심 비즈니스 로직
-- 사용자 취향 벡터 생성은 `PreferenceVectorMapper`에 위임
-- 팀 전술 벡터와 유사도 계산은 `TeamMatcher`에 위임
-- 최적 팀 선정
+```text
+src/main/java/kleague/kbti
+ ┣ config          # CORS, 설정 properties
+ ┣ controller      # API endpoint
+ ┣ domain          # JPA entity 및 도메인 보조 모델
+ ┣ dto             # request / response DTO
+ ┣ exception       # 공통 예외 응답 및 예외 타입
+ ┣ loader          # CSV 데이터 로더
+ ┣ mapper          # response DTO 매핑
+ ┣ model           # 추천 내부 모델
+ ┣ recommendation  # KBTI 코드, 벡터 변환, 매칭 전략
+ ┣ repository      # JPA / CSV repository abstraction
+ ┣ service         # 비즈니스 흐름 조합
+ ┗ util            # KBTI 설명 유틸
+```
 
 ---
 
-### recommendation
+## API 명세
 
-- `KbtiCodeGenerator`: 사용자 입력과 팀 전술 데이터에서 KBTI 코드를 생성하는 전략
-- `PreferenceVectorMapper`: 사용자 요청 DTO를 전술 벡터로 변환하는 전략
-- `TeamMatcher`: 사용자 벡터와 팀 벡터를 비교해 최적 팀을 찾는 전략
-- 기본 구현은 임계값 기반 코드 생성, 20점 스케일 벡터 변환, 유클리드 거리 매칭을 사용
+### KBTI 추천
 
-새 추천 알고리즘이나 코드 생성 규칙을 추가할 때 기존 서비스 수정 대신 새 구현체를 추가해 교체할 수 있도록 OCP 기준으로 분리했습니다.
-
----
-
-### exception
-
-- `GlobalExceptionHandler`: validation, not found, data load 실패를 표준 에러 응답으로 변환
-- `ErrorResponse`: API 에러 응답 공통 포맷
-- `ResourceNotFoundException`, `DataLoadException`: 서비스/로더 계층의 의미 있는 예외 타입
-
----
-
-### config
-
-- `WebConfig`: API CORS 정책 관리
-- `KbtiApiProperties`: `kbti.api.allowed-origins` 설정 바인딩
-- 기본 profile은 H2 console과 SQL 로그를 끄고, `dev` profile에서 개발 편의 설정을 켭니다.
-
----
-
-### model
-
-- `TeamTactics`: 팀별 전술 점수와 식별 정보를 담는 내부 모델
-- `TacticalVector`: 거리 계산 가능한 전술 벡터 값 객체
-- `KbtiDimension`: KBTI 코드 상세 설명 모델
-
----
-
-### domain
-
-#### TeamEntity
-
-- K리그 팀 전술 성향 엔티티
-- 팀별 템포, 압박, 패스 성향 등 수치 정보 저장
-
----
-
-### repository
-
-#### TeamRepository
-
-- TeamEntity JPA Repository
-- 팀 전술 데이터 조회 담당
-
----
-
-### dto
-
-#### KbtiRequest
-
-- 사용자 축구 취향 입력 DTO
-- `dto.request`에 위치
-- 모든 값은 1~5점 척도
+```http
+POST /api/kbti/test
+```
 
 ```json
 {
@@ -170,44 +293,53 @@ src/main/java/kleague/kbti
 }
 ```
 
-#### KbtiResponse
+### 팀 조회
 
-- 추천 결과 응답 DTO
-- `dto.response`에 위치
-- 추천 팀 정보 및 전술 요약 포함
-- CSV 입력 행은 API DTO가 아니므로 `loader.row`에 분리
+```http
+GET /api/teams
+GET /api/teams/{teamId}
+GET /api/teams/rank
+```
 
----
+### 선수 랭킹
 
-## 5. 서비스 동작 흐름
-
-1. CsvMigrationService를 통해 팀 전술 데이터 적재
-2. 사용자가 축구 취향 입력
-3. `PreferenceVectorMapper`가 사용자 취향을 전술 벡터로 변환
-4. `TeamMatcher`가 팀 전술 벡터와 비교해 가장 가까운 팀을 선택
-5. 추천 결과를 응답 DTO로 반환
+```http
+GET /api/players/rank?top=10&team=울산&position=MF&minGames=15
+```
 
 ---
 
-## 6. 기술 스택
+## 로컬 실행
 
-- Backend: Spring Boot
-- ORM: JPA (Hibernate)
-- Database: MySQL
-- Data Source: K리그 경기·전술 CSV
-- Analysis: Euclidean Distance 기반 벡터 유사도
-- Monitoring: Spring Boot Actuator, Micrometer, Prometheus, Grafana
-- Review Automation: CodeRabbit
-
----
-
-## 7. 모니터링
-
-애플리케이션 실행 후 Actuator Prometheus endpoint가 열립니다.
+### 애플리케이션 실행
 
 ```bash
 ./gradlew bootRun
 ```
+
+### 테스트
+
+```bash
+./gradlew test
+```
+
+### 개발 profile 실행
+
+```bash
+SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
+```
+
+### CSV 마이그레이션 profile 실행
+
+```bash
+SPRING_PROFILES_ACTIVE=migration ./gradlew bootRun
+```
+
+---
+
+## 모니터링
+
+애플리케이션 실행 후 Actuator endpoint를 확인할 수 있습니다.
 
 ```text
 http://localhost:8080/actuator/health
@@ -224,13 +356,13 @@ docker compose up -d
 - Grafana: `http://localhost:3000`
 - Grafana 기본 계정: `admin` / `admin`
 
-Prometheus는 기본적으로 `host.docker.internal:8080/actuator/prometheus`를 수집합니다. 애플리케이션 포트를 바꾸면 `monitoring/prometheus/prometheus.yml`의 target도 함께 바꿔야 합니다.
+Prometheus는 기본적으로 `host.docker.internal:8080/actuator/prometheus`를 수집합니다.
 
 ---
 
-## 8. CodeRabbit
+## CodeRabbit
 
-`.coderabbit.yaml`에서 PR 리뷰 자동화 기본값을 관리합니다.
+`.coderabbit.yaml`에서 PR 리뷰 자동화 설정을 관리합니다.
 
 - 리뷰 언어: 한국어
 - 자동 리뷰 대상 기본 브랜치: `jiin`, `main`
@@ -238,6 +370,9 @@ Prometheus는 기본적으로 `host.docker.internal:8080/actuator/prometheus`를
 
 ---
 
-## 9. 한 줄 요약
+## 한 줄 요약
 
-> K-BTI는 축구 데이터를 성향과 취향의 언어로 번역하는 데이터 기반 팀 추천 서비스입니다.
+<div align="center">
+  <h3><strong>축구 취향을 데이터로 번역해, 나와 가장 닮은 K리그 팀을 찾습니다.</strong></h3>
+  <p>K-BTI는 팀 전술 데이터와 사용자 취향을 같은 벡터 공간에서 비교하는 데이터 기반 추천 서비스입니다.</p>
+</div>
