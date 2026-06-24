@@ -1,6 +1,7 @@
 package kleague.kbti.loader;
 
-import kleague.kbti.exception.DataLoadException;
+import kleague.kbti.exception.code.DataErrorCode;
+import kleague.kbti.exception.domain.DataException;
 import kleague.kbti.loader.row.TeamRankingRow;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ public class TeamRankingCsvLoader {
             }
 
         } catch (Exception e) {
-            throw new DataLoadException("kleague_team_ranking.csv 로드 실패", e);
+            throw new DataException(DataErrorCode.TEAM_RANKING_CSV_LOAD_FAILED, e);
         }
     }
 }

@@ -1,7 +1,8 @@
 package kleague.kbti.service;
 
 import kleague.kbti.domain.TeamEntity;
-import kleague.kbti.exception.DataLoadException;
+import kleague.kbti.exception.code.DataErrorCode;
+import kleague.kbti.exception.domain.DataException;
 import kleague.kbti.repository.TeamRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +33,18 @@ public class CsvMigrationService {
             parseDetailedCsv();
             log.info("K리그 데이터 마이그레이션 완료");
         } catch (Exception e) {
-            throw new DataLoadException("K리그 데이터 마이그레이션 실패", e);
+            throw new DataException(DataErrorCode.CSV_MIGRATION_FAILED, e);
         }
     }
 
     private void parseKbtiCsv() throws Exception {
         InputStream is = getClass().getResourceAsStream("/kleague_kbti_final_revised.csv");
-        if (is == null) throw new RuntimeException("파일을 찾을 수 없습니다: kleague_kbti_final_revised.csv");
+        if (is == null) {
+            throw new DataException(
+                    DataErrorCode.CSV_RESOURCE_NOT_FOUND,
+                    "파일을 찾을 수 없습니다: kleague_kbti_final_revised.csv"
+            );
+        }
 
         // 한글 깨짐 방지를 위해 MS949 또는 EUC-KR 사용
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, "MS949"))) {
@@ -63,7 +69,12 @@ public class CsvMigrationService {
 
     private void parseDetailedCsv() throws Exception {
         InputStream is = getClass().getResourceAsStream("/kleague_stats_all_variables_detailed.csv");
-        if (is == null) throw new RuntimeException("파일을 찾을 수 없습니다: kleague_stats_all_variables_detailed.csv");
+        if (is == null) {
+            throw new DataException(
+                    DataErrorCode.CSV_RESOURCE_NOT_FOUND,
+                    "파일을 찾을 수 없습니다: kleague_stats_all_variables_detailed.csv"
+            );
+        }
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, "MS949"))) {
             String line;

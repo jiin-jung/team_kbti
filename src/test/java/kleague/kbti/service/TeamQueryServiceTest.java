@@ -1,6 +1,7 @@
 package kleague.kbti.service;
 
-import kleague.kbti.exception.ResourceNotFoundException;
+import kleague.kbti.exception.code.TeamErrorCode;
+import kleague.kbti.exception.domain.TeamException;
 import kleague.kbti.loader.TeamRankingCsvLoader;
 import kleague.kbti.mapper.TeamResponseMapper;
 import kleague.kbti.model.TacticalVector;
@@ -25,8 +26,9 @@ class TeamQueryServiceTest {
         );
 
         assertThatThrownBy(() -> service.findById(999))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("존재하지 않는 팀 ID");
+                .isInstanceOf(TeamException.class)
+                .extracting("errorCode")
+                .isEqualTo(TeamErrorCode.TEAM_NOT_FOUND);
     }
 
     private static class StubTeamTacticsRepository implements TeamTacticsRepository {

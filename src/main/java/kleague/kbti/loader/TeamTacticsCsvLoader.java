@@ -1,6 +1,7 @@
 package kleague.kbti.loader;
 
-import kleague.kbti.exception.DataLoadException;
+import kleague.kbti.exception.code.DataErrorCode;
+import kleague.kbti.exception.domain.DataException;
 import kleague.kbti.model.TacticalVector;
 import kleague.kbti.model.TeamTactics;
 import org.springframework.core.io.ClassPathResource;
@@ -48,7 +49,7 @@ public class TeamTacticsCsvLoader {
                 }
             }
         } catch (Exception e) {
-            throw new DataLoadException("kleague_kbti_service.csv 로드 실패", e);
+            throw new DataException(DataErrorCode.TEAM_TACTICS_CSV_LOAD_FAILED, e);
         }
 
         return list;
