@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    show-sql: true
+
+  h2:
+    console:
+      enabled: true
+
+kbti:
+  api:
+    allowed-origins:
+      - "*"

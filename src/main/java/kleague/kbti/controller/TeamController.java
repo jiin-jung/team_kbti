@@ -1,12 +1,15 @@
 package kleague.kbti.controller;
 
-import kleague.kbti.dto.TeamRankResponse;
-import kleague.kbti.dto.TeamResponse;
+import jakarta.validation.constraints.Positive;
+import kleague.kbti.dto.response.TeamRankResponse;
+import kleague.kbti.dto.response.TeamResponse;
 import kleague.kbti.service.TeamQueryService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/teams")
 public class TeamController {
@@ -17,21 +20,18 @@ public class TeamController {
         this.teamQueryService = teamQueryService;
     }
 
-    // 전체 팀
     @GetMapping
     public List<TeamResponse> getAllTeams() {
         return teamQueryService.findAll();
     }
 
-    // 랭킹 (문자열 경로)
     @GetMapping("/rank")
     public List<TeamRankResponse> getTeamsRank() {
         return teamQueryService.findAllSortedByRank();
     }
 
-    // 단일 팀 (ID)
     @GetMapping("/{teamId}")
-    public TeamResponse getTeam(@PathVariable int teamId) {
+    public TeamResponse getTeam(@Positive @PathVariable int teamId) {
         return teamQueryService.findById(teamId);
     }
 }

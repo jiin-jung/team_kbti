@@ -12,12 +12,35 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false
 
   h2:
     console:
-      enabled: true
+      enabled: false
 
 kleague:
   player:
     csv-path: classpath:kleague_player_basic_stats.csv
+
+kbti:
+  api:
+    allowed-origins:
+      - "http://localhost:8080"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  metrics:
+    tags:
+      application: ${spring.application.name}

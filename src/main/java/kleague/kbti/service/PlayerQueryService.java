@@ -1,8 +1,9 @@
 package kleague.kbti.service;
 
-import kleague.kbti.dto.PlayerRankResponse;
-import kleague.kbti.dto.PlayerRatingRow;
+import kleague.kbti.dto.response.PlayerRankResponse;
+import kleague.kbti.loader.row.PlayerRatingRow;
 import kleague.kbti.loader.PlayerRatingsCsvLoader;
+import kleague.kbti.mapper.PlayerResponseMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -15,14 +16,16 @@ import java.util.stream.Stream;
 public class PlayerQueryService {
 
     private final List<PlayerRatingRow> players;
+    private final PlayerResponseMapper playerResponseMapper;
 
     private static final Set<String> GK = Set.of("GK");
     private static final Set<String> DF = Set.of("CB", "RB", "LB", "LWB", "RWB");
     private static final Set<String> MF = Set.of("CDM", "CM", "RM", "LM", "CAM");
     private static final Set<String> FW = Set.of("LW", "RW", "RF", "LF", "CF");
 
-    public PlayerQueryService(PlayerRatingsCsvLoader loader) {
+    public PlayerQueryService(PlayerRatingsCsvLoader loader, PlayerResponseMapper playerResponseMapper) {
         this.players = loader.load();
+        this.playerResponseMapper = playerResponseMapper;
     }
 
     public List<PlayerRankResponse> getPlayerRankings(Integer top, String team, String positionGroup, Integer minGames) {
@@ -55,12 +58,8 @@ public class PlayerQueryService {
         int limit = (top == null || top <= 0) ? sorted.size() : Math.min(top, sorted.size());
 
         return IntStream.range(0, limit)
-                .mapToObj(i -> PlayerRankResponse.from(i + 1, sorted.get(i)))
+                .mapToObj(i -> playerResponseMapper.toRankResponse(i + 1, sorted.get(i)))
                 .toList();
-    }
-
-    private double totalScore(PlayerRatingRow p) {
-        return p.getRawScore() + p.getAiRating();
     }
 
     private String toPosGroup(String pos) {

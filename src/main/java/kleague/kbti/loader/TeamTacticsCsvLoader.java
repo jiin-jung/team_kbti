@@ -1,6 +1,8 @@
 package kleague.kbti.loader;
 
-import kleague.kbti.dto.TeamTactics;
+import kleague.kbti.exception.DataLoadException;
+import kleague.kbti.model.TacticalVector;
+import kleague.kbti.model.TeamTactics;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -18,33 +20,37 @@ public class TeamTacticsCsvLoader {
     public List<TeamTactics> load() {
         List<TeamTactics> list = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(
-                        getClass().getClassLoader().getResourceAsStream(CSV_PATH)
-                ))) {
+        try {
+            ClassPathResource resource = new ClassPathResource(CSV_PATH);
 
-            br.readLine(); // header skip
-            String line;
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)
+            )) {
 
-            while ((line = br.readLine()) != null) {
-                String[] t = line.split(",");
+                br.readLine();
+                String line;
 
-                list.add(new TeamTactics(
-                        Integer.parseInt(t[0]),   // teamId
-                        t[1],                     // teamName
-                        Integer.parseInt(t[2]),
-                        Double.parseDouble(t[3]),
-                        Double.parseDouble(t[4]),
-                        Double.parseDouble(t[5]),
-                        Double.parseDouble(t[6]),
-                        Double.parseDouble(t[7])
-                ));
+                while ((line = br.readLine()) != null) {
+                    String[] t = line.split(",");
+
+                    list.add(new TeamTactics(
+                            Integer.parseInt(t[0]),
+                            t[1],
+                            Integer.parseInt(t[2]),
+                            new TacticalVector(
+                                    Double.parseDouble(t[3]),
+                                    Double.parseDouble(t[4]),
+                                    Double.parseDouble(t[5]),
+                                    Double.parseDouble(t[6]),
+                                    Double.parseDouble(t[7])
+                            )
+                    ));
+                }
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataLoadException("kleague_kbti_service.csv 로드 실패", e);
         }
 
         return list;
     }
 }
-

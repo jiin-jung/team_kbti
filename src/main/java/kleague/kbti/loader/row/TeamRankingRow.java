@@ -1,4 +1,4 @@
-package kleague.kbti.dto;
+package kleague.kbti.loader.row;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
